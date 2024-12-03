@@ -59,37 +59,7 @@ class MainActivity : ComponentActivity() {
                     color=MaterialTheme.colorScheme.background
                 ) {
                    MyBottomApp()
-                    /*val navController= rememberNavController()
-                    var booksList by remember {
-                        mutableStateOf(listOf<Book>())
-                    }
-                    val scope= rememberCoroutineScope()
-                    LaunchedEffect(true) {
-                        scope.launch(Dispatchers.IO) {
-                            val response=try{
-                                RetrofitInstance.api.getBooksList()
-                            }catch(e:IOException){
-                                Toast.makeText(this@MainActivity,"app error${e.message}",Toast.LENGTH_SHORT).show()
-                                return@launch
-                            }catch(e:HttpException){
-                                Toast.makeText(this@MainActivity,"http error${e.message}",Toast.LENGTH_SHORT).show()
-                                return@launch
-                            }
-                            if (response.isSuccessful && response.body()!=null ){
-                                withContext(Dispatchers.Main){
-                                    booksList=response.body()!!.books
-                                }
-                            }
-                        }
-                    }
-                    NavHost(navController=navController, startDestination = "Profile") {
-                        composable(route="Profile") {
-                            Profile(booksList=booksList,navController=navController)
-                        }
-                        composable(route="DetailScreen"){
-                            DetailScreen()
-                        }
-                    }*/
+
                 }
             }
         }
@@ -97,7 +67,6 @@ class MainActivity : ComponentActivity() {
 }
 @Composable
 fun MyBottomApp(){
-    val navController= rememberNavController()
     val context= LocalContext.current
     var booksList by remember {
         mutableStateOf(listOf<Book>())
@@ -121,14 +90,7 @@ fun MyBottomApp(){
             }
         }
     }
-    NavHost(navController=navController, startDestination = "Profile") {
-        composable(Screens.Profile.screen) {
-            Profile(booksList=booksList,navController=navController)
-        }
-        composable("DetailScreen"){
-            DetailScreen(navController=navController)
-        }
-    }
+
     val navigationController= rememberNavController()
     val selected= remember {
         mutableStateOf(Icons.Default.Home)
@@ -151,7 +113,7 @@ fun MyBottomApp(){
 
                 }
                 IconButton(onClick = {selected.value=Icons.Default.Person
-                    navigationController.navigate(Screens.Profile.screen){popUpTo(0)}},
+                    navigationController.navigate(Screens.ProfileScreen.Profile.screen){popUpTo(0)}},
                     modifier=Modifier.weight(1f)) {
                     Icon(Icons.Default.Person,contentDescription = null,modifier=Modifier.size(26.dp),
                         tint=if(selected.value==Icons.Default.Person) Color.White else Color.DarkGray)
@@ -165,7 +127,32 @@ fun MyBottomApp(){
             modifier=Modifier.padding(paddingValues)) {
             composable(Screens.Home.screen){Home()}
             composable(Screens.Inform.screen){ Inform() }
-            composable(Screens.Profile.screen){ Profile(booksList =booksList , navController = navController) }
+            composable(Screens.ProfileScreen.Profile.screen){
+                Profile(booksList =booksList , navController = navigationController)
+            }
+            composable("DetailScreen?name={name}&image={image}&author={author}&url={url}",
+                arguments = listOf(
+                    navArgument(name="name"){
+                        type= NavType.StringType
+                    },
+                    navArgument(name="image"){
+                        type= NavType.StringType
+                    },
+                    navArgument(name="author"){
+                        type= NavType.StringType
+                    },
+                    navArgument(name="url"){
+                        type= NavType.StringType
+                    }
+                )){
+                DetailScreen(
+                    name=it.arguments?.getString("name"),
+                    image=it.arguments?.getString("image"),
+                    author=it.arguments?.getString("author"),
+                    url =it.arguments?.getString("url")
+
+            )
+            }
         }
 
     }
