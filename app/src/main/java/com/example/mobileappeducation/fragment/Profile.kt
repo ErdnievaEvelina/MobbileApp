@@ -38,6 +38,7 @@ import androidx.navigation.NavController
 
 import coil.compose.AsyncImage
 import com.example.mobileappeducation.model.Book
+import com.example.mobileappeducation.ui.theme.BlueJC
 import com.example.mobileappeducation.ui.theme.Purple
 
 
@@ -88,7 +89,7 @@ fun BookItem(
             navController.navigate("DetailScreen?name=${itemName}&image=${itemImage}&author=${itemAuthor}&url=${itemUrl}")
             Log.d("onClick","find")
         },
-        colors=CardDefaults.cardColors(containerColor= Purple)
+        colors=CardDefaults.cardColors(containerColor= BlueJC)
     ) {
         Column(modifier=Modifier.wrapContentSize().padding(6.dp),
             horizontalAlignment = Alignment.CenterHorizontally){
@@ -104,13 +105,4 @@ fun BookItem(
 
 }
 
-
-//@Composable
-/*fun SearchView(state: MutableState<TextFieldValue>, placeholder: String, modifier: Modifier) {
-    TextField(value=state.value, onValueChange = {value->
-        state.value=value
-    }, modifier = Modifier.fillMaxWidth().padding(10.dp).clip(RoundedCornerShape(30.dp)),
-        placeholder={Text(text=placeholder)}, maxLines = 1, singleLine = true)
-
-}*/
 

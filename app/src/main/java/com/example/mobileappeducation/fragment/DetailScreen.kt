@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
+import com.example.mobileappeducation.ui.theme.BlueJC
 import com.example.mobileappeducation.ui.theme.Purple
 
 
@@ -40,7 +41,7 @@ fun DetailScreen(
 ) {
     Column(
         modifier
-            .background(Purple)
+            .background(BlueJC)
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 45.dp),
         horizontalAlignment = Alignment.CenterHorizontally
