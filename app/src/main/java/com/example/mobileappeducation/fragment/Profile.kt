@@ -38,8 +38,9 @@ import androidx.navigation.NavController
 
 import coil.compose.AsyncImage
 import com.example.mobileappeducation.model.Book
-import com.example.mobileappeducation.ui.theme.BlueJC
-import com.example.mobileappeducation.ui.theme.Purple
+import com.example.mobileappeducation.ui.theme.Blue
+
+
 
 
 @Composable
@@ -89,7 +90,7 @@ fun BookItem(
             navController.navigate("DetailScreen?name=${itemName}&image=${itemImage}&author=${itemAuthor}&url=${itemUrl}")
             Log.d("onClick","find")
         },
-        colors=CardDefaults.cardColors(containerColor= BlueJC)
+        colors=CardDefaults.cardColors(containerColor= Blue)
     ) {
         Column(modifier=Modifier.wrapContentSize().padding(6.dp),
             horizontalAlignment = Alignment.CenterHorizontally){

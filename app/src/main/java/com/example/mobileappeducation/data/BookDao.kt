@@ -9,11 +9,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface BookDao {
     @Upsert
-    suspend fun upsertNote(book:BookEntity)
+    suspend fun upsertBook(book:BookEntity)
     @Delete
-    suspend fun deleteNote(book:BookEntity)
+    suspend fun deleteBook(book:BookEntity)
     @Query("select * from bookentity order by title")
-    fun getNotesOrderedByDateAdded(): Flow<List<BookEntity>>
-    @Query("select * from bookentity order by authors asc")
     fun getNotesOrderedByTitle(): Flow<List<BookEntity>>
+    @Query("select * from bookentity order by authors asc")
+    fun getNotesOrderedByAuthors(): Flow<List<BookEntity>>
 }

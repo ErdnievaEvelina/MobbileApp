@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class BookEntity(
     @PrimaryKey(autoGenerate = true)
-    val id       : String,
+    val id       : Int=0,
     val title    : String,
     val subtitle : String,
     val authors  : String,
