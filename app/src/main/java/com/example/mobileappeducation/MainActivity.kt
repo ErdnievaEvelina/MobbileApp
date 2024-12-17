@@ -65,113 +65,159 @@ class MainActivity : ComponentActivity() {
             "books.db"
         ).build()
     }
-    private val viewModel by viewModels<BookViewModel> (
+    private val viewModel by viewModels<BookViewModel>(
         factoryProducer = {
             object : ViewModelProvider.Factory {
-                override fun<T: ViewModel> create(modelClass: Class<T>): T {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     return BookViewModel(database.dao) as T
                 }
             }
         }
     )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MobileAppEducationTheme {
                 Surface(
-                    modifier=Modifier.fillMaxSize(),
-                    color=MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
                 ) {
 
                     val state by viewModel.state.collectAsState()
-                    val context= LocalContext.current
+                    val context = LocalContext.current
                     var booksList by remember {
                         mutableStateOf(listOf<Book>())
                     }
-                    val scope= rememberCoroutineScope()
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(true) {
                         scope.launch(Dispatchers.IO) {
-                            val response=try{
+                            val response = try {
                                 RetrofitInstance.api.getBooksList()
-                            }catch(e:IOException){
-                                Toast.makeText(context,"app error${e.message}",Toast.LENGTH_SHORT).show()
+                            } catch (e: IOException) {
+                                Toast.makeText(context, "app error${e.message}", Toast.LENGTH_SHORT)
+                                    .show()
                                 return@launch
-                            }catch(e:HttpException){
-                                Toast.makeText(context,"http error${e.message}",Toast.LENGTH_SHORT).show()
+                            } catch (e: HttpException) {
+                                Toast.makeText(
+                                    context,
+                                    "http error${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 return@launch
                             }
-                            if (response.isSuccessful && response.body()!=null ){
-                                withContext(Dispatchers.Main){
-                                    booksList=response.body()!!.books
+                            if (response.isSuccessful && response.body() != null) {
+                                withContext(Dispatchers.Main) {
+                                    booksList = response.body()!!.books
                                 }
                             }
                         }
                     }
 
-                    val navigationController= rememberNavController()
-                    val selected= remember {
+                    val navigationController = rememberNavController()
+                    val selected = remember {
                         mutableStateOf(Icons.Default.Home)
                     }
                     Scaffold(
                         bottomBar = {
                             BottomAppBar(containerColor = BlueJC) {
-                                IconButton(onClick = {selected.value=Icons.Default.Home
-                                    navigationController.navigate(Screens.Home.screen){popUpTo(0)}},
-                                    modifier=Modifier.weight(1f)) {
-                                    Icon(Icons.Default.Home,contentDescription = null,modifier=Modifier.size(26.dp),
-                                        tint=if(selected.value==Icons.Default.Home) Color.White else Color.DarkGray)
+                                IconButton(
+                                    onClick = {
+                                        selected.value = Icons.Default.Home
+                                        navigationController.navigate(Screens.Home.screen) {
+                                            popUpTo(
+                                                0
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Home,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(26.dp),
+                                        tint = if (selected.value == Icons.Default.Home) Color.White else Color.DarkGray
+                                    )
 
                                 }
-                                IconButton(onClick = {selected.value=Icons.Default.Search
-                                    navigationController.navigate(Screens.Inform.screen){popUpTo(0)}},
-                                    modifier=Modifier.weight(1f)) {
-                                    Icon(Icons.Default.Search,contentDescription = null,modifier=Modifier.size(26.dp),
-                                        tint=if(selected.value==Icons.Default.Search) Color.White else Color.DarkGray)
+                                IconButton(
+                                    onClick = {
+                                        selected.value = Icons.Default.Search
+                                        navigationController.navigate(Screens.Inform.screen) {
+                                            popUpTo(
+                                                0
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Search,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(26.dp),
+                                        tint = if (selected.value == Icons.Default.Search) Color.White else Color.DarkGray
+                                    )
 
                                 }
-                                IconButton(onClick = {selected.value=Icons.Default.Person
-                                    navigationController.navigate(Screens.ProfileScreen.Profile.screen){popUpTo(0)}},
-                                    modifier=Modifier.weight(1f)) {
-                                    Icon(Icons.Default.Person,contentDescription = null,modifier=Modifier.size(26.dp),
-                                        tint=if(selected.value==Icons.Default.Person) Color.White else Color.DarkGray)
+                                IconButton(
+                                    onClick = {
+                                        selected.value = Icons.Default.Person
+                                        navigationController.navigate(Screens.ProfileScreen.Profile.screen) {
+                                            popUpTo(
+                                                0
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Person,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(26.dp),
+                                        tint = if (selected.value == Icons.Default.Person) Color.White else Color.DarkGray
+                                    )
 
                                 }
                             }
                         }
-                    ){ paddingValues ->
-                        NavHost(navController=navigationController,
+                    ) { paddingValues ->
+                        NavHost(
+                            navController = navigationController,
                             startDestination = Screens.Home.screen,
-                            modifier=Modifier.padding(paddingValues)) {
-                            composable(Screens.Home.screen){Home()}
-                            composable(Screens.Inform.screen){
+                            modifier = Modifier.padding(paddingValues)
+                        ) {
+                            composable(Screens.Home.screen) { Home() }
+                            composable(Screens.Inform.screen) {
                                 Inform(
                                     onEvent = viewModel::onEvent,
-                                    state = state) }
-                            composable(Screens.ProfileScreen.Profile.screen){
-                                Profile(booksList =booksList , navController = navigationController)
+                                    state = state
+                                )
+                            }
+                            composable(Screens.ProfileScreen.Profile.screen) {
+                                Profile(booksList = booksList, navController = navigationController)
                             }
                             composable("DetailScreen?name={name}&image={image}&author={author}&url={url}",
                                 arguments = listOf(
-                                    navArgument(name="name"){
-                                        type= NavType.StringType
+                                    navArgument(name = "name") {
+                                        type = NavType.StringType
                                     },
-                                    navArgument(name="image"){
-                                        type= NavType.StringType
+                                    navArgument(name = "image") {
+                                        type = NavType.StringType
                                     },
-                                    navArgument(name="author"){
-                                        type= NavType.StringType
+                                    navArgument(name = "author") {
+                                        type = NavType.StringType
                                     },
-                                    navArgument(name="url"){
-                                        type= NavType.StringType
+                                    navArgument(name = "url") {
+                                        type = NavType.StringType
                                     }
-                                )){
+                                )) {
                                 DetailScreen(
-                                    name=it.arguments?.getString("name"),
-                                    image=it.arguments?.getString("image"),
-                                    author=it.arguments?.getString("author"),
-                                    url =it.arguments?.getString("url"),
+                                    name = it.arguments?.getString("name"),
+                                    image = it.arguments?.getString("image"),
+                                    author = it.arguments?.getString("author"),
+                                    url = it.arguments?.getString("url"),
                                     navController = navigationController,
-                                    state=state,
+                                    state = state,
                                     onEvent = viewModel::onEvent
                                 )
                             }
