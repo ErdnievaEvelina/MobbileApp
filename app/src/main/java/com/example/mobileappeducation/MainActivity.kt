@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
@@ -18,7 +18,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,9 +43,10 @@ import com.example.mobileappeducation.fragment.Home
 import com.example.mobileappeducation.fragment.Inform
 import com.example.mobileappeducation.fragment.Profile
 import com.example.mobileappeducation.model.Book
-import com.example.mobileappeducation.presentation.BookState
 import com.example.mobileappeducation.presentation.BookViewModel
-
+import com.example.mobileappeducation.quiz.QuizApp
+import com.example.mobileappeducation.quiz.QuizAppJava
+import com.example.mobileappeducation.quiz.QuizAppKotlin
 import com.example.mobileappeducation.screens.Screens
 import com.example.mobileappeducation.ui.theme.BlueJC
 import com.example.mobileappeducation.ui.theme.MobileAppEducationTheme
@@ -142,8 +142,27 @@ class MainActivity : ComponentActivity() {
                                 }
                                 IconButton(
                                     onClick = {
-                                        selected.value = Icons.Default.Search
+                                        selected.value = Icons.Default.Favorite
                                         navigationController.navigate(Screens.Inform.screen) {
+                                            popUpTo(
+                                                0
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Favorite,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(26.dp),
+                                        tint = if (selected.value == Icons.Default.Favorite) Color.White else Color.DarkGray
+                                    )
+
+                                }
+                                IconButton(
+                                    onClick = {
+                                        selected.value = Icons.Default.Search
+                                        navigationController.navigate(Screens.ProfileScreen.Profile.screen) {
                                             popUpTo(
                                                 0
                                             )
@@ -159,25 +178,6 @@ class MainActivity : ComponentActivity() {
                                     )
 
                                 }
-                                IconButton(
-                                    onClick = {
-                                        selected.value = Icons.Default.Person
-                                        navigationController.navigate(Screens.ProfileScreen.Profile.screen) {
-                                            popUpTo(
-                                                0
-                                            )
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Person,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(26.dp),
-                                        tint = if (selected.value == Icons.Default.Person) Color.White else Color.DarkGray
-                                    )
-
-                                }
                             }
                         }
                     ) { paddingValues ->
@@ -186,7 +186,7 @@ class MainActivity : ComponentActivity() {
                             startDestination = Screens.Home.screen,
                             modifier = Modifier.padding(paddingValues)
                         ) {
-                            composable(Screens.Home.screen) { Home() }
+                            composable(Screens.Home.screen) { Home(navController = navigationController) }
                             composable(Screens.Inform.screen) {
                                 Inform(
                                     onEvent = viewModel::onEvent,
@@ -216,15 +216,23 @@ class MainActivity : ComponentActivity() {
                                     image = it.arguments?.getString("image"),
                                     author = it.arguments?.getString("author"),
                                     url = it.arguments?.getString("url"),
-                                    navController = navigationController,
                                     state = state,
                                     onEvent = viewModel::onEvent
                                 )
                             }
+                            composable("QuizApp"){
+                                QuizApp()
+                            }
+                            composable("QuizAppKotlin"){
+                                QuizAppKotlin()
+                            }
+                            composable("QuizAppJava"){
+                                QuizAppJava()
+                            }
+
                         }
 
                     }
-
 
                 }
             }
@@ -232,102 +240,22 @@ class MainActivity : ComponentActivity() {
     }
 }
 /*@Composable
-fun MyBottomApp(){
-    val state by viewModel.state.collectAsState()
-    val context= LocalContext.current
-    var booksList by remember {
-        mutableStateOf(listOf<Book>())
+fun QuizApp(){
+    val question=listOf(
+        Question("Что такое Python?", listOf("Язык программирования","Машина","Книга"),0),
+        Question("Кто придумал Python ?", listOf("Гвидо ван Россум","Бьерн Страуструп","Джеймс Гослинг"),0),
+    )
+    var currentQuestionIndex by remember { mutableStateOf(0) }
+    var score by remember { mutableStateOf(0) }
+    if(currentQuestionIndex<question.size){
+        QuestionScreen(question=question[currentQuestionIndex],
+            onAnswerSelected = {isCorrect->
+                if(isCorrect) score++
+                currentQuestionIndex++
+            })
+    }else{
+        ResultScreen(score=score,total=question.size)
     }
-    val scope= rememberCoroutineScope()
-    LaunchedEffect(true) {
-        scope.launch(Dispatchers.IO) {
-            val response=try{
-                RetrofitInstance.api.getBooksList()
-            }catch(e:IOException){
-                Toast.makeText(context,"app error${e.message}",Toast.LENGTH_SHORT).show()
-                return@launch
-            }catch(e:HttpException){
-                Toast.makeText(context,"http error${e.message}",Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-            if (response.isSuccessful && response.body()!=null ){
-                withContext(Dispatchers.Main){
-                    booksList=response.body()!!.books
-                }
-            }
-        }
-    }
-
-    val navigationController= rememberNavController()
-    val selected= remember {
-        mutableStateOf(Icons.Default.Home)
-    }
-    Scaffold(
-        bottomBar = {
-            BottomAppBar(containerColor = BlueJC) {
-                IconButton(onClick = {selected.value=Icons.Default.Home
-                    navigationController.navigate(Screens.Home.screen){popUpTo(0)}},
-                    modifier=Modifier.weight(1f)) {
-                    Icon(Icons.Default.Home,contentDescription = null,modifier=Modifier.size(26.dp),
-                        tint=if(selected.value==Icons.Default.Home) Color.White else Color.DarkGray)
-
-                }
-                IconButton(onClick = {selected.value=Icons.Default.Search
-                    navigationController.navigate(Screens.Inform.screen){popUpTo(0)}},
-                    modifier=Modifier.weight(1f)) {
-                    Icon(Icons.Default.Search,contentDescription = null,modifier=Modifier.size(26.dp),
-                        tint=if(selected.value==Icons.Default.Search) Color.White else Color.DarkGray)
-
-                }
-                IconButton(onClick = {selected.value=Icons.Default.Person
-                    navigationController.navigate(Screens.ProfileScreen.Profile.screen){popUpTo(0)}},
-                    modifier=Modifier.weight(1f)) {
-                    Icon(Icons.Default.Person,contentDescription = null,modifier=Modifier.size(26.dp),
-                        tint=if(selected.value==Icons.Default.Person) Color.White else Color.DarkGray)
-
-                }
-            }
-        }
-    ){ paddingValues ->
-        NavHost(navController=navigationController,
-            startDestination = Screens.Home.screen,
-            modifier=Modifier.padding(paddingValues)) {
-            composable(Screens.Home.screen){Home()}
-            composable(Screens.Inform.screen){ Inform() }
-            composable(Screens.ProfileScreen.Profile.screen){
-                Profile(booksList =booksList , navController = navigationController)
-            }
-            composable("DetailScreen?name={name}&image={image}&author={author}&url={url}",
-                arguments = listOf(
-                    navArgument(name="name"){
-                        type= NavType.StringType
-                    },
-                    navArgument(name="image"){
-                        type= NavType.StringType
-                    },
-                    navArgument(name="author"){
-                        type= NavType.StringType
-                    },
-                    navArgument(name="url"){
-                        type= NavType.StringType
-                    }
-                )){
-                DetailScreen(
-                    name=it.arguments?.getString("name"),
-                    image=it.arguments?.getString("image"),
-                    author=it.arguments?.getString("author"),
-                    url =it.arguments?.getString("url"),
-                    navController = navigationController,
-                    state=state
-
-
-            )
-            }
-        }
-
-    }
-
-
 }*/
 
 
